@@ -18,17 +18,16 @@ struct CircularList {
  
     bool empty() { return head == nullptr; }
     int  size()  { return n; }
-    T&   front() { return head->data; }          // referencia: permite modificar
+    T&   front() { return head->data; }         
  
-    // ---------- CONSTRUIR ----------------------------------------
     void push_back(T v) {
         if (head == nullptr) {
             cnode<T>* nn = new cnode<T>(v);
             head = tail = nn;
-            nn->next = head;                 // <-- SE APUNTA A SI MISMO
-        }                                    //     sin esto no es circular
+            nn->next = head;                
+        }                                  
         else {
-            cnode<T>* nn = new cnode<T>(v, head);   // el ultimo apunta al primero
+            cnode<T>* nn = new cnode<T>(v, head); 
             tail->next = nn;
             tail = nn;
         }
@@ -40,14 +39,11 @@ struct CircularList {
         if (head == nullptr) { push_back(v); return; }
         cnode<T>* nn = new cnode<T>(v, head);
         tail->next = nn;
-        head = nn;                       // tail NO cambia
+        head = nn;
         ++n;
     }
  
-    // ---------- LAS DOS OPERACIONES CLAVE ------------------------
  
-    // Manda el frente al final. O(1): no se mueve ningun nodo,
-    // solo avanzan los dos punteros (esto SOLO funciona por ser circular).
     void send_front_to_back() {
         if (head == nullptr) return;
         head = head->next;
@@ -58,22 +54,19 @@ struct CircularList {
     void pop_front() {
         if (head == nullptr) return;
         cnode<T>* cur = head;
-        if (head == tail) {                  // queda uno -> lista vacia
+        if (head == tail) {                  
             head = tail = nullptr;
         }
         else {
             head = head->next;
-            tail->next = head;               // <-- RECOSER el circulo
+            tail->next = head;         
         }
         delete cur;
         --n;
     }
  
-    void clear() { while (head) pop_front(); }   // entre casos de prueba
+    void clear() { while (head) pop_front(); }  
  
-    // ---------- RECORRER -----------------------------------------
-    // OJO: "while (c != nullptr)" NO sirve, nunca termina.
-    // La parada es "he vuelto al head".
     void print() {
         if (head == nullptr) { cout << '\n'; return; }
         cnode<T>* c = head;
@@ -84,13 +77,6 @@ struct CircularList {
         cout << '\n';
     }
 };
- 
-// ===============================================================
-//  USO 1 — ROUND ROBIN
-// ---------------------------------------------------------------
-//  Cada proceso recibe como mucho q de CPU y vuelve a la cola.
-//  Si lo que le falta cabe en el quantum, termina y sale.
-// ===============================================================
 struct process {
     string name;
     int pending;
@@ -121,14 +107,7 @@ void round_robin() {
         }
     }
 }
- 
-// ===============================================================
-//  USO 2 — JOSEPHUS  (elimina uno de cada dos)
-// ---------------------------------------------------------------
-//  n ninos en circulo. El 1 sobrevive y va al final, el 2 se
-//  elimina, el 3 sobrevive... hasta vaciar el circulo.
-//  Complejidad O(n).
-// ===============================================================
+
 void josephus() {
     int n;
     cin >> n;
@@ -147,7 +126,6 @@ void josephus() {
     cout << '\n';
 }
  
-// ===============================================================
 int main() {
     cin.tie(0) -> sync_with_stdio(false);
  
