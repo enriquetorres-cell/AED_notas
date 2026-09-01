@@ -29,7 +29,7 @@ int main() {
     Poly R;
     node *a = P.head, *b = Q.head;
 
-    // ============ ESCRIBE TÚ DESDE AQUÍ ============
+
     while (a and b) {
         if (a->e < b->e) {
             R.push_back(a->e, a->c);
