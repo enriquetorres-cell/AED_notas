@@ -1,208 +1,193 @@
-
 #include <iostream>
 using namespace std;
 
-template<typename T>
+template<typename data_type>
 struct node {
-    T data;
-    node<T>* next;
-    node(T data, node<T>* next = nullptr) : data(data), next(next) {}
+    data_type data;
+    node<data_type>* next;
+    node(data_type data, node<data_type>* next = nullptr) : data(data), next(next) {}
 };
 
-template<typename T>
+template<typename data_type>
 struct LinkedList {
-    node<T>* head;
-    node<T>* tail;
-    int n;                       // tamano, mantenido a mano
+    node<data_type>* head;
+    node<data_type>* tail;
+    int tamano;
 
-    LinkedList() { head = tail = nullptr; n = 0; }
+    LinkedList() { head = tail = nullptr; tamano = 0; }
 
     bool empty() { return head == nullptr; }
-    int  size()  { return n; }
+    int  size()  { return tamano; }
 
-    // ---------- CONSTRUIR ----------------------------------------
-    void push_front(T v) {
-        node<T>* nn = new node<T>(v, head);
-        if (head == nullptr) tail = nn;
-        head = nn;
-        ++n;
-    }
-    void push_back(T v) {
-        node<T>* nn = new node<T>(v);
-        if (tail == nullptr) head = tail = nn;
-        else { tail->next = nn; tail = nn; }
-        ++n;
-    }
-    void insert(node<T>* prev, T v) {          // inserta DESPUES de prev
-        node<T>* nn = new node<T>(v, prev->next);
-        if (prev == tail) tail = nn;
-        prev->next = nn;
-        ++n;
-    }
-    void insert(int k, T v) {                  // 0-indexed
-        if (k == 0) { push_front(v); return; }
-        node<T>* cur = head;
-        for (int i = 1; i <= k - 1; ++i) cur = cur->next;
-        insert(cur, v);
+    void push_front(data_type valor) {
+        node<data_type>* new_node = new node<data_type>(valor, head);
+        if (head == nullptr) tail = new_node;
+        head = new_node;
+        ++tamano;
     }
 
-    // ---------- BORRAR -------------------------------------------
+    void push_back(data_type valor) {
+        node<data_type>* new_node = new node<data_type>(valor);
+        if (tail == nullptr) head = tail = new_node;
+        else { tail->next = new_node; tail = new_node; }
+        ++tamano;
+    }
+
+    void insert(node<data_type>* prev, data_type valor) {
+        node<data_type>* new_node = new node<data_type>(valor, prev->next);
+        if (prev == tail) tail = new_node;
+        prev->next = new_node;
+        ++tamano;
+    }
+
+    void insert(int k, data_type valor) {
+        if (k == 0) { push_front(valor); return; }
+        node<data_type>* current = head;
+        for (int i = 1; i <= k - 1; ++i) current = current->next;
+        insert(current, valor);
+    }
+
     void pop_front() {
-        if (!head) return;
-        node<T>* cur = head;
+        if (head == nullptr) return;
+        node<data_type>* current = head;
         head = head->next;
         if (head == nullptr) tail = nullptr;
-        delete cur;
-        --n;
-    }
-    void erase(node<T>* prev) {                // borra el SIGUIENTE de prev
-        if (prev->next == nullptr) return;
-        node<T>* cur = prev->next;
-        if (cur == tail) tail = prev;
-        prev->next = cur->next;
-        delete cur;
-        --n;
-    }
-    void erase(int k) {                        // 0-indexed
-        if (k == 0) { pop_front(); return; }
-        node<T>* cur = head;
-        for (int i = 1; i <= k - 1; ++i) cur = cur->next;
-        erase(cur);
-    }
-    void clear() {                             // IMPRESCINDIBLE entre casos de prueba
-        while (head) pop_front();
+        delete current;
+        --tamano;
     }
 
-    // ---------- RECORRER -----------------------------------------
+    void erase(node<data_type>* prev) {
+        if (prev->next == nullptr) return;
+        node<data_type>* current = prev->next;
+        if (current == tail) tail = prev;
+        prev->next = current->next;
+        delete current;
+        --tamano;
+    }
+
+    void erase(int k) {
+        if (k == 0) { pop_front(); return; }
+        node<data_type>* current = head;
+        for (int i = 1; i <= k - 1; ++i) current = current->next;
+        erase(current);
+    }
+
+    void clear() {
+        while (head != nullptr) pop_front();
+    }
+
     void print() {
-        for (node<T>* c = head; c; c = c->next) cout << c->data << ' ';
+        node<data_type>* current = head;
+        while (current != nullptr) { cout << current->data << ' '; current = current->next; }
         cout << '\n';
     }
 
-    // ---------- TECNICAS -----------------------------------------
-
-    // Reverse iterativo. O(n) tiempo, O(1) espacio.
     void reverse() {
-        node<T>* last = nullptr;
-        node<T>* cur  = head;
-        while (cur) {
-            node<T>* nxt = cur->next;   // 1. guardo
-            cur->next = last;           // 2. giro
-            last = cur;                 // 3. nueva cima
-            cur = nxt;                  // 4. avanzo
+        node<data_type>* last_chosen = nullptr;
+        node<data_type>* current     = head;
+        while (current != nullptr) {
+            node<data_type>* nxt_node = current->next;
+            current->next = last_chosen;
+            last_chosen = current;
+            current = nxt_node;
         }
-        tail = head;                    // se intercambian
-        head = last;
+        tail = head;
+        head = last_chosen;
     }
 
-    // Nodo del medio (tortuga y liebre). Con n par: el segundo del medio.
-    node<T>* middle() {
-        node<T> *slow = head, *fast = head;
-        while (fast and fast->next) { slow = slow->next; fast = fast->next->next; }
-        return slow;
+    node<data_type>* middle() {
+        node<data_type>* tortoise = head;
+        node<data_type>* hare     = head;
+        while (hare != nullptr and hare->next != nullptr) {
+            tortoise = tortoise->next;
+            hare = hare->next->next;
+        }
+        return tortoise;
     }
 
-    // k-esimo desde el final (dos punteros a distancia fija). k >= 1.
-    node<T>* kth_from_end(int k) {
-        node<T>* ptr = head;
-        for (int i = 0; i < k; ++i) { if (!ptr) return nullptr; ptr = ptr->next; }
-        node<T>* cur = head;
-        while (ptr) { cur = cur->next; ptr = ptr->next; }
-        return cur;
+    node<data_type>* kth_from_end(int k) {
+        node<data_type>* adelantado = head;
+        for (int i = 0; i < k; ++i) {
+            if (adelantado == nullptr) return nullptr;
+            adelantado = adelantado->next;
+        }
+        node<data_type>* current = head;
+        while (adelantado != nullptr) {
+            current = current->next;
+            adelantado = adelantado->next;
+        }
+        return current;
     }
+
     void remove_kth_from_end(int k) {
-        node<T>* target = kth_from_end(k);
-        if (target == nullptr) return;
-        if (target == head) pop_front();
+        node<data_type>* objetivo = kth_from_end(k);
+        if (objetivo == nullptr) return;
+        if (objetivo == head) pop_front();
         else erase(kth_from_end(k + 1));
     }
 
-    // Rota k posiciones a la derecha. O(n) gracias al k %= n.
     void rotate_right(int k) {
         if (head == nullptr or head == tail) return;
-        k %= n;
+        k %= tamano;
         if (k == 0) return;
-        tail->next = head;                            // cierro el circulo
-        for (int i = 0; i < n - k; ++i) {             // giro
+        tail->next = head;
+        for (int i = 0; i < tamano - k; ++i) {
             head = head->next;
             tail = tail->next;
         }
-        tail->next = nullptr;                         // abro por el punto nuevo
+        tail->next = nullptr;
     }
 
-    // Quita duplicados ADYACENTES (lista ordenada).
     void remove_duplicates() {
-        node<T>* cur = head;
-        while (cur and cur->next) {
-            if (cur->data == cur->next->data) erase(cur);   // no avanzo: puede haber 3+
-            else cur = cur->next;
+        node<data_type>* current = head;
+        while (current != nullptr and current->next != nullptr) {
+            if (current->data == current->next->data) erase(current);
+            else current = current->next;
         }
     }
 
-    // Fusiona "other" (ordenada) dentro de esta (ordenada). Reusa nodos.
-    // Al terminar, "other" queda vacia.
-    void merge_sorted(LinkedList<T>& other) {
-        node<T>* a = head;
-        node<T>* b = other.head;
-        node<T>* nh = nullptr;
-        node<T>* nt = nullptr;
-        auto append = [&](node<T>* x) {
-            if (nt == nullptr) nh = nt = x;
-            else { nt->next = x; nt = x; }
-        };
-        while (a and b) {
-            if (a->data <= b->data) { append(a); a = a->next; }
-            else                    { append(b); b = b->next; }
-        }
-        node<T>* resto = a ? a : b;
-        while (resto) { append(resto); resto = resto->next; }
+    void merge_sorted(LinkedList<data_type>& otra) {
+        node<data_type>* a = head;
+        node<data_type>* b = otra.head;
+        node<data_type>* nueva_head = nullptr;
+        node<data_type>* nueva_tail = nullptr;
 
-        head = nh; tail = nt;
-        if (tail) tail->next = nullptr;
-        n += other.n;
-        other.head = other.tail = nullptr; other.n = 0;
+        while (a != nullptr and b != nullptr) {
+            node<data_type>* elegido;
+            if (a->data <= b->data) { elegido = a; a = a->next; }
+            else                    { elegido = b; b = b->next; }
+            if (nueva_tail == nullptr) nueva_head = nueva_tail = elegido;
+            else { nueva_tail->next = elegido; nueva_tail = elegido; }
+        }
+        node<data_type>* resto = (a != nullptr) ? a : b;
+        while (resto != nullptr) {
+            if (nueva_tail == nullptr) nueva_head = nueva_tail = resto;
+            else { nueva_tail->next = resto; nueva_tail = resto; }
+            resto = resto->next;
+        }
+
+        head = nueva_head;
+        tail = nueva_tail;
+        if (tail != nullptr) tail->next = nullptr;
+        tamano += otra.tamano;
+        otra.head = otra.tail = nullptr;
+        otra.tamano = 0;
     }
 };
 
-// ===============================================================
-//  ESQUELETO DE MAIN PARA CODEFORCES
-// ===============================================================
 int main() {
     cin.tie(0) -> sync_with_stdio(false);
 
-    // --- UN SOLO CASO ---
-    // int n, q;  cin >> n >> q;
-    // LinkedList<int> L;
-    // for (...) { ... L.push_back(x); }
-    // ... procesar ...
-    // L.print();
-
-    // --- VARIOS CASOS HASTA EOF (ojo: L.clear() en cada vuelta) ---
-    // int n, m;
-    // int caso = 1;
-    // while (cin >> n >> m) {
-    //     LinkedList<int> L;              // o L.clear() si es reutilizada
-    //     ...
-    //     cout << "Case " << caso++ << ": " << S << '\n';
-    // }
-
-    // ---- demo de las tecnicas (borrar en el envio) ----
     LinkedList<int> L;
-    for (int x : {1,2,3,4,5}) L.push_back(x);
-    L.print();                                    // 1 2 3 4 5
-    cout << "medio: " << L.middle()->data << '\n';        // 3
-    cout << "2do desde el final: " << L.kth_from_end(2)->data << '\n';  // 4
-    L.rotate_right(2);  L.print();                // 4 5 1 2 3
-    L.reverse();        L.print();                // 3 2 1 5 4
-    L.remove_kth_from_end(2); L.print();          // 3 2 1 4
-    L.push_back(9);     L.print();                // 3 2 1 4 9   (tail vivo)
-
-    LinkedList<int> A, B;
-    for (int x : {1,3,5}) A.push_back(x);
-    for (int x : {2,3,6}) B.push_back(x);
-    A.merge_sorted(B);  A.print();                // 1 2 3 3 5 6
-    A.remove_duplicates(); A.print();             // 1 2 3 5 6
-    A.push_back(7);     A.print();                // 1 2 3 5 6 7
+    int n, q;
+    cin >> n >> q;
+    for (int i = 0; i < q; ++i) {
+        string op;
+        cin >> op;
+        if (op[0] == 'I') { int k, x; cin >> k >> x; L.insert(k, x); }
+        else              { int k;    cin >> k;      L.erase(k); }
+    }
+    L.print();
 
     return 0;
 }
