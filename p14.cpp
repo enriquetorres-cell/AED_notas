@@ -33,8 +33,6 @@ struct CircularList {
         }
         ++n;
     }
-    // Inserta al inicio. Tambien O(1): el nodo nuevo se cuelga
-    // de tail (que ya apuntaba a head) y pasa a ser el head.
     void push_front(T v) {
         if (head == nullptr) { push_back(v); return; }
         cnode<T>* nn = new cnode<T>(v, head);
@@ -50,7 +48,6 @@ struct CircularList {
         tail = tail->next;
     }
  
-    // Quita el frente.
     void pop_front() {
         if (head == nullptr) return;
         cnode<T>* cur = head;
@@ -94,15 +91,15 @@ void round_robin() {
     }
     int timestamp = 0;
     while (not L.empty()) {
-        process cur = L.front();              // copia
+        process cur = L.front();            
         if (cur.pending > q) {
-            L.front().pending -= q;           // descuento el quantum
-            L.send_front_to_back();           // y va al final
+            L.front().pending -= q;         
+            L.send_front_to_back();        
             timestamp += q;
         }
         else {
             L.pop_front();
-            timestamp += cur.pending;         // solo lo que le faltaba
+            timestamp += cur.pending;        
             cout << cur.name << ' ' << timestamp << '\n';
         }
     }
@@ -116,10 +113,10 @@ void josephus() {
  
     bool first = true;
     while (not L.empty()) {
-        L.send_front_to_back();               // el de delante sobrevive
+        L.send_front_to_back();            
         if (L.empty()) break;
         if (!first) cout << ' ';
-        cout << L.front();                    // el siguiente se elimina
+        cout << L.front();                   
         first = false;
         L.pop_front();
     }
@@ -128,8 +125,6 @@ void josephus() {
  
 int main() {
     cin.tie(0) -> sync_with_stdio(false);
- 
-    // --- demo (borrar en el envio) ---
     CircularList<int> L;
     for (int x : {1,2,3,4,5}) L.push_back(x);
     L.print();
@@ -139,8 +134,6 @@ int main() {
     L.print();                    // 3 4 5 1
     cout << "size: " << L.size() << '\n';   // 4
  
-    // descomenta la que necesites:
-    // round_robin();
-    // josephus();
+  
     return 0;
 }
